@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Compras</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 10px;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 100%;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+    
+    .tabs {
+      display: flex;
+      background: #f8f9fa;
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-bottom: 3px solid transparent;
+    }
+    
+    .tab.active {
+      background: white;
+      border-bottom-color: #4CAF50;
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    
+    .content {
+      padding: 20px;
+      min-height: 60vh;
+    }
+    
+    .form-container {
+      margin-bottom: 20px;
+    }
+    
+    .input-group {
+      margin-bottom: 15px;
+    }
+    
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #555;
+    }
+    
+    input {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      border: 2px solid #e1e1e1;
+      border-radius: 10px;
+      transition: border-color 0.3s ease;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: #4CAF50;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 10px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-edit {
+      background: #17a2b8;
+      color: white;
+      padding: 8px 15px;
+      font-size: 14px;
+      border-radius: 6px;
+      margin-left: 10px;
+    }
+    
+    .btn-delete {
+      background: #dc3545;
+      color: white;
+      padding: 8px 15px;
+      font-size: 14px;
+      border-radius: 6px;
+      margin-left: 5px;
+    }
+    
+    .lista {
+      margin-top: 20px;
+    }
+    
+    .lista-item {
+      background: #f8f9fa;
+      margin-bottom: 10px;
+      padding: 15px;
+      border-radius: 10px;
+      border-left: 5px solid #4CAF50;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .item-info {
+      flex: 1;
+    }
+    
+    .item-nome {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .item-detalhes {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .item-acoes {
+      display: flex;
+      gap: 5px;
+    }
+    
+    .total {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 20px;
+      border-radius: 10px;
+    }
+    
+    .empty-state {
+      text-align: center;
+      color: #666;
+      padding: 40px 20px;
+    }
+    
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 10px;
+      opacity: 0.5;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+    }
+
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 400px;
+    }
+
+    .modal-header {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🛒 Lista de Compras</h1>
+      <p>Organize suas compras facilmente</p>
+    </div>
+    
+    <div class="tabs">
+      <button class="tab active" data-tab="adicionar">Adicionar</button>
+      <button class="tab" data-tab="lista">Lista</button>
+      <button class="tab" data-tab="precos">Preços</button>
+    </div>
+    
+    <div class="content">
+      <!-- Aba Adicionar -->
+      <div class="tab-content active" id="adicionar">
+        <div class="form-container">
+          <form id="form-produto">
+            <div class="input-group">
+              <label for="produto">Nome do Produto</label>
+              <input type="text" id="produto" placeholder="Ex: Arroz, Feijão, Leite..." required />
+            </div>
+            
+            <div class="input-group">
+              <label for="quantidade">Quantidade</label>
+              <input type="number" id="quantidade" placeholder="1" value="1" min="1" required />
+            </div>
+            
+            <div class="input-group">
+              <label for="preco">Preço Unitário (R$) - Opcional</label>
+              <input type="number" id="preco" placeholder="0.00" step="0.01" min="0" />
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Adicionar à Lista</button>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Aba Lista -->
+      <div class="tab-content" id="lista">
+        <div id="lista-compras">
+          <div class="empty-state">
+            <div style="font-size: 48px;">📝</div>
+            <p>Sua lista está vazia</p>
+            <p style="font-size: 14px; margin-top: 10px;">Adicione produtos na aba "Adicionar"</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Aba Preços -->
+      <div class="tab-content" id="precos">
+        <div id="lista-precos">
+          <div class="empty-state">
+            <div style="font-size: 48px;">💰</div>
+            <p>Nenhum produto com preço</p>
+            <p style="font-size: 14px; margin-top: 10px;">Adicione preços aos produtos da sua lista</p>
+          </div>
+        </div>
+        <div class="total" id="total-container" style="display: none;">
+          Total: R$ <span id="total">0.00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Edição -->
+  <div class="modal" id="modal-edit">
+    <div class="modal-content">
+      <div class="modal-header">Editar Produto</div>
+      <form id="form-edit">
+        <div class="input-group">
+          <label for="edit-produto">Nome do Produto</label>
+          <input type="text" id="edit-produto" required />
+        </div>
+        
+        <div class="input-group">
+          <label for="edit-quantidade">Quantidade</label>
+          <input type="number" id="edit-quantidade" min="1" required />
+        </div>
+        
+        <div class="input-group">
+          <label for="edit-preco">Preço Unitário (R$)</label>
+          <input type="number" id="edit-preco" step="0.01" min="0" />
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Dados em memória (substitui localStorage)
+    let compras = [];
+    let editandoIndex = -1;
+
+    // Elementos do DOM
+    const form = document.getElementById('form-produto');
+    const formEdit = document.getElementById('form-edit');
+    const listaCompras = document.getElementById('lista-compras');
+    const listaPrecos = document.getElementById('lista-precos');
+    const totalSpan = document.getElementById('total');
+    const totalContainer = document.getElementById('total-container');
+    const modal = document.getElementById('modal-edit');
+
+    // Gerenciamento de abas
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', function() {
+        const tabName = this.dataset.tab;
+        
+        // Remove active de todas as abas
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+        
+        // Adiciona active na aba clicada
+        this.classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+        
+        // Atualiza as listas quando muda de aba
+        if (tabName === 'lista') {
+          atualizarListaSimples();
+        } else if (tabName === 'precos') {
+          atualizarListaPrecos();
+        }
+      });
+    });
+
+    // Adicionar produto
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const produto = document.getElementById('produto').value.trim();
+      const quantidade = parseInt(document.getElementById('quantidade').value);
+      const preco = parseFloat(document.getElementById('preco').value) || 0;
+      
+      compras.push({ 
+        produto, 
+        quantidade, 
+        preco: preco || null,
+        id: Date.now()
+      });
+      
+      form.reset();
+      document.getElementById('quantidade').value = 1;
+      
+      // Mostra feedback
+      mostrarFeedback('Produto adicionado!');
+      
+      // Se estiver na aba lista, atualiza
+      if (document.querySelector('.tab.active').dataset.tab === 'lista') {
+        atualizarListaSimples();
+      }
+    });
+
+    // Editar produto
+    formEdit.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      if (editandoIndex >= 0) {
+        compras[editandoIndex] = {
+          ...compras[editandoIndex],
+          produto: document.getElementById('edit-produto').value.trim(),
+          quantidade: parseInt(document.getElementById('edit-quantidade').value),
+          preco: parseFloat(document.getElementById('edit-preco').value) || null
+        };
+        
+        fecharModal();
+        atualizarListaSimples();
+        atualizarListaPrecos();
+        mostrarFeedback('Produto atualizado!');
+      }
+    });
+
+    function atualizarListaSimples() {
+      if (compras.length === 0) {
+        listaCompras.innerHTML = `
+          <div class="empty-state">
+            <div style="font-size: 48px;">📝</div>
+            <p>Sua lista está vazia</p>
+            <p style="font-size: 14px; margin-top: 10px;">Adicione produtos na aba "Adicionar"</p>
+          </div>
+        `;
+        return;
+      }
+
+      listaCompras.innerHTML = compras.map((item, index) => `
+        <div class="lista-item">
+          <div class="item-info">
+            <div class="item-nome">${item.produto}</div>
+            <div class="item-detalhes">
+              Quantidade: ${item.quantidade}
+              ${item.preco ? ` • R$ ${item.preco.toFixed(2)} cada` : ' • Sem preço'}
+            </div>
+          </div>
+          <div class="item-acoes">
+            <button class="btn-edit" onclick="editarItem(${index})">✏️</button>
+            <button class="btn-delete" onclick="removerItem(${index})">🗑️</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function atualizarListaPrecos() {
+      const comPreco = compras.filter(item => item.preco && item.preco > 0);
+      
+      if (comPreco.length === 0) {
+        listaPrecos.innerHTML = `
+          <div class="empty-state">
+            <div style="font-size: 48px;">💰</div>
+            <p>Nenhum produto com preço</p>
+            <p style="font-size: 14px; margin-top: 10px;">Adicione preços aos produtos da sua lista</p>
+          </div>
+        `;
+        totalContainer.style.display = 'none';
+        return;
+      }
+
+      let total = 0;
+      listaPrecos.innerHTML = comPreco.map((item, index) => {
+        const subtotal = item.quantidade * item.preco;
+        total += subtotal;
+        const originalIndex = compras.findIndex(c => c.id === item.id);
+        
+        return `
+          <div class="lista-item">
+            <div class="item-info">
+              <div class="item-nome">${item.produto}</div>
+              <div class="item-detalhes">
+                ${item.quantidade} x R$ ${item.preco.toFixed(2)} = R$ ${subtotal.toFixed(2)}
+              </div>
+            </div>
+            <div class="item-acoes">
+              <button class="btn-edit" onclick="editarItem(${originalIndex})">✏️</button>
+              <button class="btn-delete" onclick="removerItem(${originalIndex})">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      totalSpan.textContent = total.toFixed(2);
+      totalContainer.style.display = 'block';
+    }
+
+    function editarItem(index) {
+      editandoIndex = index;
+      const item = compras[index];
+      
+      document.getElementById('edit-produto').value = item.produto;
+      document.getElementById('edit-quantidade').value = item.quantidade;
+      document.getElementById('edit-preco').value = item.preco || '';
+      
+      modal.style.display = 'block';
+    }
+
+    function removerItem(index) {
+      if (confirm('Tem certeza que deseja remover este item?')) {
+        compras.splice(index, 1);
+        atualizarListaSimples();
+        atualizarListaPrecos();
+        mostrarFeedback('Item removido!');
+      }
+    }
+
+    function fecharModal() {
+      modal.style.display = 'none';
+      editandoIndex = -1;
+    }
+
+    function mostrarFeedback(mensagem) {
+      // Cria um toast simples
+      const toast = document.createElement('div');
+      toast.style.cssText = `
+        position: fixed;
+        top: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 20px;
+        z-index: 2000;
+        animation: fadeInOut 2s ease;
+      `;
+      toast.textContent = mensagem;
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes fadeInOut {
+          0%, 100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+          10%, 90% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+      `;
+      document.head.appendChild(style);
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        document.body.removeChild(toast);
+        document.head.removeChild(style);
+      }, 2000);
+    }
+
+    // Fechar modal clicando fora
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        fecharModal();
+      }
+    });
+
+    // Inicializar
+    atualizarListaSimples();
+  </script>
+</body>
+</html>
